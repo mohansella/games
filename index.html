@@ -1,13 +1,73 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>My Simple Web Page</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>HTML5 Games Collection</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <style>
+    .thumb {
+      position: relative;
+      width: 100%;
+      padding-top: 75%; /* 4:3 aspect ratio (3/4 = 0.75) */
+      background: #eee;
+      overflow: hidden;
+      cursor: pointer;
+      border-radius: 8px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+      transition: transform 0.2s;
+    }
+    .thumb img {
+      position: absolute;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      object-fit: cover;
+    }
+    .thumb:hover {
+      transform: scale(1.05);
+    }
+    #gameFrame {
+      width: 100%;
+      height: 70vh;
+      border: none;
+      display: none; /* hidden by default */
+      margin-bottom: 1rem;
+    }
+  </style>
 </head>
-<body>
-    <h1>Welcome to My Page</h1>
-    <p>This is a paragraph of text on my simple web page.</p>
-    <p>You can add more content here.</p>
+<body class="bg-light">
+
+<div class="container py-4">
+
+  <h1 class="text-center mb-4">🎮 My HTML5 Games Collection</h1>
+
+  <!-- iframe game player -->
+  <iframe id="gameFrame"></iframe>
+
+  <!-- Thumbnails grid -->
+  <div class="row g-3">
+    <div class="col-6 col-md-4 col-lg-3">
+      <div class="thumb" onclick="loadGame('games/sudoku-js/sudoku.html')">
+        <img src="images/thumbnails/sudoku-js.png" alt="sudoku">
+      </div>
+    </div>
+    <div class="col-6 col-md-4 col-lg-3">
+      <div class="thumb" onclick="loadGame('games/2048/index.html')">
+        <img src="images/thumbnails/2048.png" alt="2048">
+      </div>
+    </div>
+    <!-- Add more games here -->
+  </div>
+</div>
+
+<script>
+  function loadGame(url) {
+    const frame = document.getElementById('gameFrame');
+    frame.src = url;
+    frame.style.display = 'block';
+    frame.scrollIntoView({ behavior: 'smooth' });
+  }
+</script>
+
 </body>
 </html>
