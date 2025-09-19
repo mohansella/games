@@ -1,3 +1,6 @@
+# my id
+google.com, pub-4960401276769125, DIRECT, f08c47fec0942fa0
+
 #gpx-property-28N7M
 #gpx-last-updated-2024-11-21
 #gpx-reviq
