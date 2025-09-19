@@ -3,71 +3,122 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>HTML5 Games Collection</title>
+  <title>Game Catalog</title>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
   <style>
-    .thumb {
-      position: relative;
+    #game-iframe {
       width: 100%;
-      padding-top: 75%; /* 4:3 aspect ratio (3/4 = 0.75) */
-      background: #eee;
-      overflow: hidden;
+      height: 500px;
+      border: 1px solid #ccc;
+      margin-bottom: 20px;
+      display: none; /* hide initially */
+    }
+    .thumbnail {
       cursor: pointer;
-      border-radius: 8px;
-      box-shadow: 0 2px 6px rgba(0,0,0,0.2);
-      transition: transform 0.2s;
+      margin-bottom: 20px;
     }
-    .thumb img {
-      position: absolute;
-      top: 0; left: 0;
-      width: 100%; height: 100%;
-      object-fit: cover;
-    }
-    .thumb:hover {
-      transform: scale(1.05);
-    }
-    #gameFrame {
+    .thumbnail img {
       width: 100%;
-      height: 70vh;
-      border: none;
-      display: none; /* hidden by default */
-      margin-bottom: 1rem;
+      height: auto;
+      border-radius: 5px;
+    }
+    .game-title {
+      text-align: center;
+      margin-top: 5px;
+      font-size: 0.9rem;
+      font-weight: 500;
     }
   </style>
 </head>
-<body class="bg-light">
+<body class="p-4">
 
-<div class="container py-4">
+  <div class="container">
+    <h1 class="mb-4">Game Catalog</h1>
 
-  <h1 class="text-center mb-4">🎮 My HTML5 Games Collection</h1>
+    <!-- iframe for selected game -->
+    <iframe id="game-iframe" src="" frameborder="0"></iframe>
 
-  <!-- iframe game player -->
-  <iframe id="gameFrame"></iframe>
-
-  <!-- Thumbnails grid -->
-  <div class="row g-3">
-    <div class="col-6 col-md-4 col-lg-3">
-      <div class="thumb" onclick="loadGame('games/sudoku-js/sudoku.html')">
-        <img src="images/thumbnails/sudoku-js.png" alt="sudoku">
-      </div>
+    <!-- search bar -->
+    <div class="mb-3">
+      <input type="text" id="search-input" class="form-control" placeholder="Search games by title or description...">
     </div>
-    <div class="col-6 col-md-4 col-lg-3">
-      <div class="thumb" onclick="loadGame('games/2048/index.html')">
-        <img src="images/thumbnails/2048.png" alt="2048">
-      </div>
-    </div>
-    <!-- Add more games here -->
+
+    <!-- thumbnails grid -->
+    <div class="row" id="games-container"></div>
   </div>
-</div>
 
-<script>
-  function loadGame(url) {
-    const frame = document.getElementById('gameFrame');
-    frame.src = url;
-    frame.style.display = 'block';
-    frame.scrollIntoView({ behavior: 'smooth' });
-  }
-</script>
+  <!-- sql.js -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/sql.js/1.8.0/sql-wasm.js"></script>
+  <script>
+    let db;
+    const dbFile = 'games.db'; // your sqlite file
+
+    fetch(dbFile)
+      .then(res => res.arrayBuffer())
+      .then(buffer => initDatabase(buffer));
+
+    async function initDatabase(buffer) {
+      const SQL = await initSqlJs({ locateFile: file => `https://cdnjs.cloudflare.com/ajax/libs/sql.js/1.8.0/${file}` });
+      db = new SQL.Database(new Uint8Array(buffer));
+
+      // initial load (first 20 games)
+      loadGames();
+    }
+
+    function loadGames(searchText = "") {
+      if (!db) return;
+
+      const safeText = searchText.replace(/'/g, "''");
+      let query = `
+        SELECT id, title, banner_image, url
+        FROM games
+      `;
+
+      if (safeText) {
+        query += ` WHERE title LIKE '%${safeText}%' OR description LIKE '%${safeText}%'`;
+      }
+
+      query += ` ORDER BY id LIMIT 20`;
+
+      const res = db.exec(query);
+      const container = document.getElementById('games-container');
+      container.innerHTML = '';
+
+      if (res.length === 0) return;
+
+      const columns = res[0].columns;
+      const values = res[0].values;
+
+      values.forEach(row => {
+        const game = {};
+        columns.forEach((col, i) => game[col] = row[i]);
+
+        const colDiv = document.createElement('div');
+        colDiv.className = 'col-6 col-md-3';
+
+        colDiv.innerHTML = `
+          <div class="thumbnail" onclick="loadGame('${game.url}')">
+            <img src="${game.banner_image}" alt="${game.title}">
+            <div class="game-title">${game.title}</div>
+          </div>
+        `;
+        container.appendChild(colDiv);
+      });
+    }
+
+    function loadGame(url) {
+      const iframe = document.getElementById('game-iframe');
+      iframe.src = url;
+      iframe.style.display = 'block'; // show iframe
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    // search input event
+    document.getElementById('search-input').addEventListener('input', (e) => {
+      const text = e.target.value.trim();
+      loadGames(text);
+    });
+  </script>
 
 </body>
 </html>
