@@ -1,10 +1,3 @@
-Below are the steps to load all the games from gamepix.com
-
- 1. Signup in my.gamepix.com
- 2. Update the ads.txt by creating property. This may not be necessory for prototype
- 3. copy below code into `main.js` in a folder and also add `npm install node-fetch` and finally run `node main.js` to fetch all the games and save in `games.json` file
-
-```js
 import fetch from "node-fetch";
 import fs from "fs";
 
@@ -23,4 +16,3 @@ async function fetchAll() {
 }
 
 fetchAll();
-```
