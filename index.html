@@ -12,13 +12,11 @@
     src="https://cdn-cookieyes.com/client_data/17ad0e8ffccb80ebed341fbd/script.js"></script>
   <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-4960401276769125"
     crossorigin="anonymous"></script>
-  <!-- Google tag (gtag.js) -->
   <script async src="https://www.googletagmanager.com/gtag/js?id=G-W3MEB76SQ5"></script>
   <script>
     window.dataLayer = window.dataLayer || [];
-    function gtag() {dataLayer.push(arguments);}
+    function gtag() { dataLayer.push(arguments); }
     gtag('js', new Date());
-
     gtag('config', 'G-W3MEB76SQ5');
   </script>
   <!-- cookies and ads -->
@@ -29,21 +27,17 @@
       height: 500px;
       border: 1px solid #ccc;
       margin-bottom: 20px;
-      display: none;
-      /* hide initially */
+      display: none; /* hide initially */
     }
-
     .thumbnail {
       cursor: pointer;
       margin-bottom: 20px;
     }
-
     .thumbnail img {
       width: 100%;
       height: auto;
       border-radius: 5px;
     }
-
     .game-title {
       text-align: center;
       margin-top: 5px;
@@ -54,7 +48,6 @@
 </head>
 
 <body class="p-4">
-
   <div class="container">
     <h1 class="mb-4">Game Catalog</h1>
 
@@ -63,7 +56,7 @@
 
     <!-- search bar -->
     <div class="mb-3">
-      <input type="text" id="search-input" class="form-control" placeholder="Search games by title or description...">
+      <input type="text" id="search-input" class="form-control" placeholder="Search games by title, description, or tags...">
     </div>
 
     <!-- thumbnails grid -->
@@ -74,17 +67,15 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/sql.js/1.8.0/sql-wasm.js"></script>
   <script>
     let db;
-    const dbFile = 'games.db'; // your sqlite file
+    const dbFile = 'games.db';
 
     fetch(dbFile)
       .then(res => res.arrayBuffer())
       .then(buffer => initDatabase(buffer));
 
     async function initDatabase(buffer) {
-      const SQL = await initSqlJs({locateFile: file => `https://cdnjs.cloudflare.com/ajax/libs/sql.js/1.8.0/${file}`});
+      const SQL = await initSqlJs({ locateFile: file => `https://cdnjs.cloudflare.com/ajax/libs/sql.js/1.8.0/${file}` });
       db = new SQL.Database(new Uint8Array(buffer));
-
-      // initial load (first 20 games)
       loadGames();
     }
 
@@ -93,15 +84,19 @@
 
       const safeText = searchText.replace(/'/g, "''");
       let query = `
-        SELECT id, title, banner_image, url
+        SELECT id, title, description, url, thumb, category, tags
         FROM games
       `;
 
       if (safeText) {
-        query += ` WHERE title LIKE '%${safeText}%' OR description LIKE '%${safeText}%'`;
+        query += ` 
+          WHERE title LIKE '%${safeText}%' 
+          OR description LIKE '%${safeText}%' 
+          OR tags LIKE '%${safeText}%' 
+          OR category LIKE '%${safeText}%'`;
       }
 
-      query += ` ORDER BY id LIMIT 20`;
+      query += ` ORDER BY id LIMIT 40`;
 
       const res = db.exec(query);
       const container = document.getElementById('games-container');
@@ -121,7 +116,7 @@
 
         colDiv.innerHTML = `
           <div class="thumbnail" onclick="loadGame('${game.url}')">
-            <img src="${game.banner_image}" alt="${game.title}">
+            <img src="${game.thumb}" alt="${game.title}">
             <div class="game-title">${game.title}</div>
           </div>
         `;
@@ -132,8 +127,8 @@
     function loadGame(url) {
       const iframe = document.getElementById('game-iframe');
       iframe.src = url;
-      iframe.style.display = 'block'; // show iframe
-      window.scrollTo({top: 0, behavior: 'smooth'});
+      iframe.style.display = 'block';
+      window.scrollTo({ top: 0, behavior: 'smooth' });
     }
 
     // search input event
@@ -142,7 +137,5 @@
       loadGames(text);
     });
   </script>
-
 </body>
-
 </html>
